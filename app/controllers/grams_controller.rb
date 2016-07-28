@@ -1,6 +1,19 @@
 class GramsController < ApplicationController
   before_action :authenticate_user!, only: [:new, :create]
 
+  def update
+    @gram = Gram.find_by_id(params[:id])
+    return render_not_found if @gram.blank?
+
+    @gram.update_attributes(gram_params)
+
+    if @gram.valid?
+      redirect_to root_path
+    else
+      return render :edit, status: :unprocessable_entity
+    end
+  end
+
   def index
   end
 
@@ -19,9 +32,12 @@ class GramsController < ApplicationController
 
   def show
     @gram = Gram.find_by_id(params[:id])
-    if @gram.blank?
-      render text: 'Not found :(', status: :not_found
-    end
+    return render_not_found if @gram.blank?
+  end
+
+  def edit
+    @gram = Gram.find_by_id(params[:id])
+    return render_not_found if @gram.blank?
   end
 
   private
@@ -29,4 +45,9 @@ class GramsController < ApplicationController
   def gram_params
     params.require(:gram).permit(:message)
   end
+
+  def render_not_found
+    render text: 'Not found :(', status: :not_found 
+  end
+
 end
